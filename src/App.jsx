@@ -43,6 +43,7 @@ const copyToClipboard = (text) => {
 };
 
 // Función para llamar a Gemini API
+// Función para llamar a Gemini API
 const callGeminiAPI = async (prompt) => {
   if (!apiKey) {
       console.error("Falta la API Key de Gemini.");
@@ -59,12 +60,21 @@ const callGeminiAPI = async (prompt) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      if (!response.ok) throw new Error('Network error');
+      
+      // SI HAY ERROR, LEEMOS EL MENSAJE REAL DE GOOGLE
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || `Error de Google: ${response.status}`);
+      }
+      
       const data = await response.json();
       return data.candidates?.[0]?.content?.parts?.[0]?.text || "No se generó respuesta.";
     } catch (error) {
       console.error("Error llamando a Gemini:", error);
-      if (attempt === delays.length) return "Hubo un problema al conectar con la IA. Por favor, revisa tu API Key o inténtalo más tarde.";
+      if (attempt === delays.length) {
+         // AQUÍ SE MUESTRA EL ERROR EXACTO EN LA PANTALLA
+         return `⚠️ Error detallado: ${error.message}`;
+      }
       await new Promise(resolve => setTimeout(resolve, delays[attempt]));
     }
   }
