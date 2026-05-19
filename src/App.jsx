@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { LogIn, LogOut, Upload, Plus, CheckCircle, Clock, User, Lock, DollarSign, AlertCircle, Sparkles, Copy, TrendingUp, Trash2, Download, MessageCircle, Lightbulb } from 'lucide-react';
 
+// --- CONFIGURACIÓN DE FIREBASE Y GEMINI ---
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, doc, setDoc, updateDoc, onSnapshot, getDocs, deleteDoc } from 'firebase/firestore';
 
-
+// 👇👇👇 1. PON AQUÍ LOS DATOS DE TU BASE DE DATOS FIREBASE 👇👇👇
+// Sustituye estos datos de ejemplo por los que te dio Firebase para tu proyecto
 const firebaseConfig = {
   apiKey: "AIzaSyAazdyBkZakQDfmXMyI9wQNJIjiJqxCNTc",
   authDomain: "claumy-app-5ae90.firebaseapp.com",
@@ -15,16 +17,22 @@ const firebaseConfig = {
   appId: "1:896761091426:web:65b457a8dba82457f7483b",
   measurementId: "G-9ZMFRGT6CE"
 };
+// 👆👆👆 ======================================================== 👆👆👆
 
-const app = initializeApp(firebaseConfig);
+// (Esta línea es por si lo pruebas en la web de IA, si estás en tu ordenador usa la de arriba)
+const finalFirebaseConfig = Object.keys(firebaseConfig).length > 0 && firebaseConfig.apiKey !== "TU_API_KEY_DE_FIREBASE_AQUI" ? firebaseConfig : (typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {});
+
+const app = initializeApp(finalFirebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
+// 👇👇👇 2. PON AQUÍ TU CLAVE DE GEMINI (IA) 👇👇👇
+// Pégala dentro de las comillas. Si no la pones, la IA no funcionará.
+const apiKey = "AIzaSyD5IK1-gIb4zXvK1a7JT6FB9p2nHeQWyRg"; 
+// 👆👆👆 ========================================== 👆👆👆
 
-const apiKey = ""; 
-
-
+// Función para copiar al portapapeles
 const copyToClipboard = (text) => {
   const textArea = document.createElement("textarea");
   textArea.value = text;
@@ -38,8 +46,12 @@ const copyToClipboard = (text) => {
   document.body.removeChild(textArea);
 };
 
-
+// Función para llamar a Gemini API
 const callGeminiAPI = async (prompt) => {
+  if (!apiKey) {
+      console.error("Falta la API Key de Gemini.");
+      return "⚠️ Error: No se ha configurado la API Key de Gemini. Por favor añádela en el código.";
+  }
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
   const payload = { contents: [{ parts: [{ text: prompt }] }] };
   const delays = [1000, 2000, 4000, 8000, 16000];
@@ -55,7 +67,8 @@ const callGeminiAPI = async (prompt) => {
       const data = await response.json();
       return data.candidates?.[0]?.content?.parts?.[0]?.text || "No se generó respuesta.";
     } catch (error) {
-      if (attempt === delays.length) return "Hubo un problema al conectar con la IA. Inténtalo más tarde.";
+      console.error("Error llamando a Gemini:", error);
+      if (attempt === delays.length) return "Hubo un problema al conectar con la IA. Por favor, revisa tu API Key o inténtalo más tarde.";
       await new Promise(resolve => setTimeout(resolve, delays[attempt]));
     }
   }
@@ -66,12 +79,12 @@ const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [notification, setNotification] = useState(null);
   
-
+  // Estados de Base de datos
   const [fbUser, setFbUser] = useState(null);
   const [dbReady, setDbReady] = useState(false);
   const [ambassadors, setAmbassadors] = useState([]);
 
- 
+  // 1. Inicializar Autenticación
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -89,7 +102,7 @@ const App = () => {
     return () => unsubscribe();
   }, []);
 
-  
+  // 2. Escuchar Datos de la Nube (Realtime)
   useEffect(() => {
     if (!fbUser) return;
 
@@ -140,7 +153,7 @@ const App = () => {
     setTimeout(() => setNotification(null), 6000);
   };
 
-  
+  // --- COMPONENTE DE CARGA ---
   if (!dbReady) {
     return (
       <>
@@ -156,7 +169,7 @@ const App = () => {
     );
   }
 
- 
+  // --- COMPONENTE DE LOGIN ---
   const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -468,6 +481,7 @@ const App = () => {
       <div className="min-h-screen bg-gray-50 pb-10">
         <header className="bg-white shadow-sm border-b border-pink-100 px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-3">
+             {/* Se usa LOGOTIPO-05.png. Reemplaza el archivo en tu carpeta public si quieres cambiarlo */}
              <img src="LOGOTIPO-05.png" alt="Logo" className="h-8 object-contain opacity-80" onError={(e) => e.target.style.display = 'none'} />
              <h1 className="text-xl font-bold text-gray-800 hidden sm:block">Panel de Administración</h1>
           </div>
@@ -571,7 +585,8 @@ const App = () => {
                 <p className="text-sm text-indigo-700 mb-4">Analiza el rendimiento general de las embajadoras.</p>
                 <button 
                   onClick={handleGenerateInsights} disabled={isAnalyzing}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg transition-colors flex items-center justify-center font-medium shadow-md disabled:opacity-70"
+                  // Botón cambiado a blanco con texto índigo
+                  className="w-full bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50 py-2.5 rounded-lg transition-colors flex items-center justify-center font-medium shadow-sm disabled:opacity-70"
                 >
                   {isAnalyzing ? <Clock className="animate-spin mr-2" size={18}/> : <Sparkles className="mr-2" size={18}/>}
                   {isAnalyzing ? 'Analizando...' : 'Generar Análisis'}
@@ -600,7 +615,8 @@ const App = () => {
                   </select>
                   <button 
                     onClick={handleGenerateMotivationalMessage} disabled={isGeneratingMsg}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 rounded-lg transition-colors flex items-center justify-center shadow-md disabled:opacity-70"
+                    // Botón cambiado a blanco con texto esmeralda
+                    className="bg-white text-emerald-600 border border-emerald-200 hover:bg-emerald-50 px-4 rounded-lg transition-colors flex items-center justify-center shadow-sm disabled:opacity-70"
                   >
                     {isGeneratingMsg ? <Clock className="animate-spin" size={18}/> : <Sparkles size={18}/>}
                   </button>
@@ -785,6 +801,7 @@ const App = () => {
       <div className="min-h-screen bg-pink-50 pb-10 font-sans">
         <header className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-3">
+             {/* Se usa LOGOTIPO-05.png. Reemplaza el archivo en tu carpeta public si quieres cambiarlo */}
              <img src="LOGOTIPO-05.png" alt="Logo" className="h-8 object-contain opacity-80" onError={(e) => e.target.style.display = 'none'} />
           </div>
           <div className="flex items-center space-x-4">
@@ -908,7 +925,8 @@ const App = () => {
                 />
                 <button 
                   onClick={handleGeneratePost} disabled={isGenerating}
-                  className="w-full bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-xl font-medium transition-colors shadow-md disabled:opacity-70 flex justify-center items-center"
+                  // Botón cambiado a blanco con texto oscuro
+                  className="w-full bg-white text-gray-900 border border-gray-200 hover:bg-gray-50 px-6 py-3 rounded-xl font-medium transition-colors shadow-sm disabled:opacity-70 flex justify-center items-center"
                 >
                   {isGenerating ? <Clock className="animate-spin mr-2" size={18}/> : <Sparkles className="mr-2" size={18} />}
                   {isGenerating ? 'Escribiendo...' : 'Generar Texto ✨'}
@@ -935,7 +953,8 @@ const App = () => {
               <div className="space-y-3 mt-auto">
                 <button 
                   onClick={handleGenerateIdeas} disabled={isGeneratingIdeas}
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-medium transition-colors shadow-md disabled:opacity-70 flex justify-center items-center mt-6"
+                  // Botón cambiado a blanco con texto naranja
+                  className="w-full bg-white text-orange-500 border border-orange-200 hover:bg-orange-50 px-6 py-3 rounded-xl font-medium transition-colors shadow-sm disabled:opacity-70 flex justify-center items-center mt-6"
                 >
                   {isGeneratingIdeas ? <Clock className="animate-spin mr-2" size={18}/> : <Sparkles className="mr-2" size={18} />}
                   {isGeneratingIdeas ? 'Pensando ideas...' : 'Sugerir Ideas ✨'}
