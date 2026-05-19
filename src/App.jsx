@@ -1,13 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { LogIn, LogOut, Upload, Plus, CheckCircle, Clock, User, Lock, DollarSign, AlertCircle, Sparkles, Copy, TrendingUp, Trash2, Download, MessageCircle, Lightbulb } from 'lucide-react';
 
-// --- CONFIGURACIÓN DE FIREBASE Y GEMINI ---
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, doc, setDoc, updateDoc, onSnapshot, getDocs, deleteDoc } from 'firebase/firestore';
 
-// 👇👇👇 ATENCIÓN: CUANDO LO LLEVES A TU ORDENADOR (VS CODE), CAMBIA ESTE BLOQUE 👇👇👇
-// Sustituye todo este bloque 'const firebaseConfig...' por el que te dio Firebase.
+
 const firebaseConfig = {
   apiKey: "AIzaSyAazdyBkZakQDfmXMyI9wQNJIjiJqxCNTc",
   authDomain: "claumy-app-5ae90.firebaseapp.com",
@@ -23,10 +21,10 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-// 👇 Pon tu clave de Gemini si quieres que la IA funcione en tu web real 👇
+
 const apiKey = ""; 
 
-// Función para copiar al portapapeles
+
 const copyToClipboard = (text) => {
   const textArea = document.createElement("textarea");
   textArea.value = text;
@@ -40,7 +38,7 @@ const copyToClipboard = (text) => {
   document.body.removeChild(textArea);
 };
 
-// Función para llamar a Gemini API
+
 const callGeminiAPI = async (prompt) => {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
   const payload = { contents: [{ parts: [{ text: prompt }] }] };
@@ -68,12 +66,12 @@ const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [notification, setNotification] = useState(null);
   
-  // Estados de Base de datos
+
   const [fbUser, setFbUser] = useState(null);
   const [dbReady, setDbReady] = useState(false);
   const [ambassadors, setAmbassadors] = useState([]);
 
-  // 1. Inicializar Autenticación
+ 
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -91,7 +89,7 @@ const App = () => {
     return () => unsubscribe();
   }, []);
 
-  // 2. Escuchar Datos de la Nube (Realtime)
+  
   useEffect(() => {
     if (!fbUser) return;
 
@@ -142,7 +140,7 @@ const App = () => {
     setTimeout(() => setNotification(null), 6000);
   };
 
-  // --- COMPONENTE DE CARGA ---
+  
   if (!dbReady) {
     return (
       <>
@@ -158,7 +156,7 @@ const App = () => {
     );
   }
 
-  // --- COMPONENTE DE LOGIN ---
+ 
   const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
