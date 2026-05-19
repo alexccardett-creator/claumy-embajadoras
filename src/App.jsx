@@ -8,7 +8,7 @@ import { getFirestore, collection, doc, setDoc, updateDoc, onSnapshot, getDocs, 
 
 // 👇👇👇 1. PON AQUÍ LOS DATOS DE TU BASE DE DATOS FIREBASE 👇👇👇
 const firebaseConfig = {
-  apiKey: "TU_API_KEY_DE_FIREBASE_AQUI",
+  apiKey: "AIzaSyAazdyBkZakQDfmXMyI9wQNJIjiJqxCNTc",
   authDomain: "claumy-app-5ae90.firebaseapp.com",
   projectId: "claumy-app-5ae90",
   storageBucket: "claumy-app-5ae90.firebasestorage.app",
@@ -27,7 +27,9 @@ const db = getFirestore(app);
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
 // 👇👇👇 2. PON AQUÍ TU CLAVE DE GEMINI (IA) 👇👇👇
-const apiKey = "AIzaSyDaV0fkSPMjraeuj0lkzM7JEJhIovzqFwA"; 
+// ATENCIÓN: Para que funcione AQUÍ en este entorno de pruebas, debe estar vacía ("").
+// El entorno inyecta su propia clave automáticamente.
+const apiKey = ""; 
 // 👆👆👆 ========================================== 👆👆👆
 
 // Función para copiar al portapapeles
@@ -46,14 +48,8 @@ const copyToClipboard = (text) => {
 
 // Función para llamar a Gemini API
 const callGeminiAPI = async (prompt) => {
-  if (!apiKey) {
-      console.error("Falta la API Key de Gemini.");
-      return "⚠️ Error: No se ha configurado la API Key de Gemini. Por favor añádela en el código.";
-  }
-  
-  // 👇 AQUÍ ESTÁ LA SOLUCIÓN: Cambiamos a "gemini-pro", el modelo universal 👇
-  
-  const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}` ;
+  // En este entorno de vista previa, USAMOS el modelo gemini-2.5-flash-preview-09-2025
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
   const payload = { contents: [{ parts: [{ text: prompt }] }] };
   const delays = [1000, 2000, 4000, 8000, 16000];
 
@@ -782,30 +778,6 @@ const App = () => {
       }
     };
 
-    // Funciones IA Embajadora
-    const handleGeneratePost = async () => {
-      if (!aiTopic) return showNotification("⚠️ Dinos de qué quieres que trate el post.");
-      setIsGenerating(true);
-      const prompt = `Eres un experto en redes sociales para manicuristas. Escribe un texto corto, fresco, con emojis, ideal para un Reels de Instagram o TikTok promocionando productos de la academia de uñas "Claumy". El tema del post es: "${aiTopic}". Es crucial que incluyas este código de descuento del 10% de la embajadora: "${myData.code}". Hazlo divertido, directo y que anime a comprar.`;
-      const response = await callGeminiAPI(prompt);
-      setGeneratedPost(response);
-      setIsGenerating(false);
-    };
-
-    const handleGenerateIdeas = async () => {
-      setIsGeneratingIdeas(true);
-      const prompt = `Eres un estratega de contenido viral para TikTok e Instagram. Sugiere 3 ideas creativas y rápidas de grabar para un Reel o TikTok sobre uñas, promocionando la tienda 'Claumy Nails Academy'. La embajadora debe mencionar su código de descuento del 10%: "${myData.code}". 
-      Da el título de la idea y una breve línea explicando qué grabar o qué audio usar. Hazlo fresco, divertido y con emojis.`;
-      const response = await callGeminiAPI(prompt);
-      setVideoIdeas(response);
-      setIsGeneratingIdeas(false);
-    };
-
-    const handleCopyText = (text) => {
-      copyToClipboard(text);
-      showNotification("¡Texto copiado al portapapeles!");
-    };
-
     return (
       <div className="min-h-screen bg-pink-50 pb-10 font-sans">
         <header className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
@@ -878,10 +850,10 @@ const App = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div className="max-w-2xl mx-auto mb-8">
             
             {/* Sección Retiro */}
-            <div className="bg-white p-8 rounded-3xl shadow-sm border border-pink-100 flex flex-col justify-center items-center text-center lg:col-span-1">
+            <div className="bg-white p-8 rounded-3xl shadow-sm border border-pink-100 flex flex-col justify-center items-center text-center">
               <h3 className="text-xl font-semibold text-gray-800 mb-2">Retirar Saldo</h3>
               <p className="text-gray-600 mb-6 text-sm">
                 Solicita saldo para comprar productos en Claumy.
@@ -914,67 +886,6 @@ const App = () => {
                       Retirar TODO
                     </button>
                   </div>
-                </div>
-              )}
-            </div>
-
-            {/* IA 1: Creador de Posts */}
-            <div className="bg-gradient-to-br from-pink-100 to-rose-50 p-8 rounded-3xl shadow-sm border border-pink-200 lg:col-span-1">
-              <h3 className="text-xl font-semibold text-gray-800 mb-2 flex items-center justify-center lg:justify-start">
-                <Sparkles className="mr-2 text-pink-500" /> Escribir un Post
-              </h3>
-              <p className="text-gray-600 mb-4 text-sm text-center lg:text-left">
-                Dinos de qué hablarás y la IA escribirá tu post con el código <b>{myData.code}</b>.
-              </p>
-              <div className="space-y-3">
-                <input 
-                  type="text" value={aiTopic} onChange={(e) => setAiTopic(e.target.value)}
-                  placeholder="Ej: Nuevos geles..."
-                  className="w-full p-3 rounded-xl border border-pink-200 focus:outline-none focus:ring-2 focus:ring-pink-400"
-                />
-                <button 
-                  onClick={handleGeneratePost} disabled={isGenerating}
-                  // Botón cambiado a blanco con texto oscuro
-                  className="w-full bg-white text-gray-900 border border-gray-200 hover:bg-gray-50 px-6 py-3 rounded-xl font-medium transition-colors shadow-sm disabled:opacity-70 flex justify-center items-center"
-                >
-                  {isGenerating ? <Clock className="animate-spin mr-2" size={18}/> : <Sparkles className="mr-2" size={18} />}
-                  {isGenerating ? 'Escribiendo...' : 'Generar Texto ✨'}
-                </button>
-              </div>
-              {generatedPost && (
-                <div className="mt-5 bg-white p-4 rounded-xl border border-pink-100 shadow-sm relative group max-h-48 overflow-y-auto">
-                  <div className="text-sm text-gray-700 whitespace-pre-wrap">{generatedPost}</div>
-                  <button onClick={() => handleCopyText(generatedPost)} className="absolute top-2 right-2 p-2 bg-pink-50 text-pink-600 rounded-lg opacity-0 group-hover:opacity-100" title="Copiar texto">
-                    <Copy size={16} />
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* IA 2: Ideas de Contenido */}
-            <div className="bg-gradient-to-br from-orange-50 to-amber-50 p-8 rounded-3xl shadow-sm border border-orange-200 lg:col-span-1">
-              <h3 className="text-xl font-semibold text-gray-800 mb-2 flex items-center justify-center lg:justify-start">
-                <Lightbulb className="mr-2 text-orange-500" /> Ideas para Videos
-              </h3>
-              <p className="text-gray-600 mb-4 text-sm text-center lg:text-left">
-                ¿Sin inspiración? Obtén 3 ideas creativas y virales para grabar Reels hoy mismo promocionando Claumy.
-              </p>
-              <div className="space-y-3 mt-auto">
-                <button 
-                  onClick={handleGenerateIdeas} disabled={isGeneratingIdeas}
-                  // Botón cambiado a blanco con texto naranja
-                  className="w-full bg-white text-orange-500 border border-orange-200 hover:bg-orange-50 px-6 py-3 rounded-xl font-medium transition-colors shadow-sm disabled:opacity-70 flex justify-center items-center mt-6"
-                >
-                  {isGeneratingIdeas ? <Clock className="animate-spin mr-2" size={18}/> : <Sparkles className="mr-2" size={18} />}
-                  {isGeneratingIdeas ? 'Pensando ideas...' : 'Sugerir Ideas ✨'}
-                </button>
-              </div>
-              {videoIdeas && (
-                <div className="mt-5 bg-white p-4 rounded-xl border border-orange-100 shadow-sm relative group max-h-48 overflow-y-auto">
-                  <div className="text-sm text-gray-700 whitespace-pre-wrap">{videoIdeas}</div>
-                  <button onClick={() => handleCopyText(videoIdeas)} className="absolute top-2 right-2 p-2 bg-orange-50 text-orange-600 rounded-lg opacity-0 group-hover:opacity-100" title="Copiar ideas">
-                    <Copy size={16} />
-                  </button>
                 </div>
               )}
             </div>
