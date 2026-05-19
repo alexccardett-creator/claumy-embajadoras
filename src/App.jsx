@@ -7,9 +7,8 @@ import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged }
 import { getFirestore, collection, doc, setDoc, updateDoc, onSnapshot, getDocs, deleteDoc } from 'firebase/firestore';
 
 // 👇👇👇 1. PON AQUÍ LOS DATOS DE TU BASE DE DATOS FIREBASE 👇👇👇
-// Sustituye estos datos de ejemplo por los que te dio Firebase para tu proyecto
 const firebaseConfig = {
-  apiKey: "AIzaSyAazdyBkZakQDfmXMyI9wQNJIjiJqxCNTc",
+  apiKey: "TU_API_KEY_DE_FIREBASE_AQUI",
   authDomain: "claumy-app-5ae90.firebaseapp.com",
   projectId: "claumy-app-5ae90",
   storageBucket: "claumy-app-5ae90.firebasestorage.app",
@@ -26,7 +25,10 @@ const app = initializeApp(finalFirebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-const apiKey = "AIzaSyDaV0fkSPMjraeuj01kzM7JEJhIovzqFwA"; 
+
+// 👇👇👇 2. PON AQUÍ TU CLAVE DE GEMINI (IA) 👇👇👇
+const apiKey = "AIzaSyDaV0fkSPMjraeuj0lkzM7JEJhIovzqFwA"; 
+// 👆👆👆 ========================================== 👆👆👆
 
 // Función para copiar al portapapeles
 const copyToClipboard = (text) => {
@@ -43,13 +45,14 @@ const copyToClipboard = (text) => {
 };
 
 // Función para llamar a Gemini API
-// Función para llamar a Gemini API
 const callGeminiAPI = async (prompt) => {
   if (!apiKey) {
       console.error("Falta la API Key de Gemini.");
       return "⚠️ Error: No se ha configurado la API Key de Gemini. Por favor añádela en el código.";
   }
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+  
+  // 👇 AQUÍ ESTÁ LA SOLUCIÓN: Cambiamos a "gemini-pro", el modelo universal 👇
+ const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
   const payload = { contents: [{ parts: [{ text: prompt }] }] };
   const delays = [1000, 2000, 4000, 8000, 16000];
 
@@ -72,7 +75,6 @@ const callGeminiAPI = async (prompt) => {
     } catch (error) {
       console.error("Error llamando a Gemini:", error);
       if (attempt === delays.length) {
-         // AQUÍ SE MUESTRA EL ERROR EXACTO EN LA PANTALLA
          return `⚠️ Error detallado: ${error.message}`;
       }
       await new Promise(resolve => setTimeout(resolve, delays[attempt]));
