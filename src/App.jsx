@@ -27,10 +27,8 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-// 👇👇👇 2. PON AQUÍ TU CLAVE DE GEMINI (IA) 👇👇👇
-// Pégala dentro de las comillas. Si no la pones, la IA no funcionará.
+
 const apiKey = "AIzaSyD5IK1-gIb4zXvK1a7JT6FB9p2nHeQWyRg"; 
-// 👆👆👆 ========================================== 👆👆👆
 
 // Función para copiar al portapapeles
 const copyToClipboard = (text) => {
