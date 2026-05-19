@@ -49,7 +49,7 @@ const callGeminiAPI = async (prompt) => {
       console.error("Falta la API Key de Gemini.");
       return "⚠️ Error: No se ha configurado la API Key de Gemini. Por favor añádela en el código.";
   }
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
   const payload = { contents: [{ parts: [{ text: prompt }] }] };
   const delays = [1000, 2000, 4000, 8000, 16000];
 
