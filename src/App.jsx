@@ -27,8 +27,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-
-const apiKey = "AIzaSyD5IK1-gIb4zXvK1a7JT6FB9p2nHeQWyRg"; 
+const apiKey = "AIzaSyDaV0fkSPMjraeuj01kzM7JEJhIovzqFwA"; 
 
 // Función para copiar al portapapeles
 const copyToClipboard = (text) => {
