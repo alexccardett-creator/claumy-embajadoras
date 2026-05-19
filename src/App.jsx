@@ -52,7 +52,7 @@ const callGeminiAPI = async (prompt) => {
   }
   
   // 👇 AQUÍ ESTÁ LA SOLUCIÓN: Cambiamos a "gemini-pro", el modelo universal 👇
- const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const url = https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey};
   const payload = { contents: [{ parts: [{ text: prompt }] }] };
   const delays = [1000, 2000, 4000, 8000, 16000];
 
