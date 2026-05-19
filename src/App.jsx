@@ -26,7 +26,6 @@ const app = initializeApp(finalFirebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
 const apiKey = "AIzaSyDaV0fkSPMjraeuj01kzM7JEJhIovzqFwA"; 
 
 // Función para copiar al portapapeles
@@ -49,7 +48,7 @@ const callGeminiAPI = async (prompt) => {
       console.error("Falta la API Key de Gemini.");
       return "⚠️ Error: No se ha configurado la API Key de Gemini. Por favor añádela en el código.";
   }
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
   const payload = { contents: [{ parts: [{ text: prompt }] }] };
   const delays = [1000, 2000, 4000, 8000, 16000];
 
